@@ -4,31 +4,27 @@
 #Last Modified: 26/9/2013
 
 def Test(file):
-
 	#parse Instances into list
+	#instances = 
 	totalNumInstances = 0
 	print grade(instances, totalNumInstances)
 
-
-def sort(instance):
+def sort(instance, tNI): #method for sorting instances based on probability, takes an instance
+							#and the total number of all instances
+	classesProb = totalCounts 
+	for c in classesProb.keys #set the base probability for each class
+		classesProb[c] = (totalCounts[c] / tNI)
+	
 	probSum = 0
-	classesProb = totalCounts
-	
 	for c in classesProb.keys:
-		for i in instance:
-			for a in i.values.keys: #summing the probability of each attribute
-				probSum = probSum + log(getValueCount(a, i.values[a], c))
-			classesProb[c] = probSum #The probability for the instance to be classified as c is recorded
-			probSum = 0 #reset probSum to 0 for next instance
-	
-	return max(classesProb.iteritems(), key = operator.itemgetter(1))[0]
-	#Resources: http://docs.python.org/2/library/functions.html#max, 
-		#http://docs.python.org/2/library/operator.html, 
-		#http://stackoverflow.com/questions/16569502/get-the-key-correspond-to-maxvalue-in-python-dict?lq=1
-		
-	#Whichever probability in classes is higher is the key that is returned
-	
-	
+		for a in instance.values.keys: #summing the probability of each attribute
+			probSum = probSum + log(getValueCount(a, i.values[a], c))
+		classesProb[c] = classesProb[c] + probSum #The probability for the instance to be classified as c is recorded
+
+	return max(classesProb.iteritems(), key = operator.itemgetter(1))[0] #return class with highest value in probability
+		#Resources: http://docs.python.org/2/library/functions.html#max, 
+			#http://docs.python.org/2/library/operator.html, 
+			#http://stackoverflow.com/questions/16569502/get-the-key-correspond-to-maxvalue-in-python-dict?lq=1
 	
 def grade(instanceList, totalNumInstances):
 	correctSum = 0	#accuracy of the classification
