@@ -22,7 +22,9 @@ def sort(instance):
 			probSum = 0 #reset probSum to 0 for next instance
 	
 	return max(classesProb.iteritems(), key = operator.itemgetter(1))[0]
-		#Resources: http://docs.python.org/2/library/functions.html#max, http://docs.python.org/2/library/operator.html, http://stackoverflow.com/questions/16569502/get-the-key-correspond-to-maxvalue-in-python-dict?lq=1
+	#Resources: http://docs.python.org/2/library/functions.html#max, 
+		#http://docs.python.org/2/library/operator.html, 
+		#http://stackoverflow.com/questions/16569502/get-the-key-correspond-to-maxvalue-in-python-dict?lq=1
 		
 	#Whichever probability in classes is higher is the key that is returned
 	
