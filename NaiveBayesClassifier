@@ -5,18 +5,40 @@
 import math
 import operator
 
+
+
 class Instance:
-	values = {} #dictionary entries
-	@property  #the actual classification of the Instance
-	def Classification(self):
-		return self.values["Classification"]
-	def __init__(self):
-		self.values = {}
+		values = {} #dictionary entries
+		@property  #the actual classification of the Instance
+		def Classification(self):
+			return self.values['class']
+		def __init__(self):
+			self.values = {}
+
+
+class valueTracker:
+	totalCounts = {}
+	totalNumInstances = 0
+	values = {}
+
+	def getValueCount(self, AttributeName, TestValue, Class):
+		if TestValue in self.values[Class][AttributeName].keys():
+			return self.values[Class][AttributeName][TestValue]
+		else:
+			return 0.000000000000001
+	def __init__(self, values, totalNumInstances, totalCounts):
+		self.values = values
+		self.totalNumInstances = totalNumInstances
+		self.totalCounts = totalCounts
+
+
+
+
 
 def parseLine(line): #parses variables on an @ line
 
 	line = line.replace ('@', '')
-	wordList = line.split(",") #put each word into list 
+	wordList = line.split("\t") #put each word into list 
 	return wordList
 
 
@@ -52,25 +74,83 @@ def parseDataFile(dataFile):
 				# for attr,value in zip(listofVariables, valueList):
 				# 	print attr + ":" + value
 				# 	listOfInstances[-1].values[attr] = value
+				
 	return listOfInstances
 
 
-def Test(file):
+def train(file):
+	instances = parseDataFile(file)
+	values = {}
+
+	for instance in instances:
+		if instance.Classification in values.keys():
+			continue
+		else:
+			values[instance.Classification] = {}
+
+	
+	for key in values.keys():
+		for keyb in instances[0].values.keys():
+			values[key][keyb] = {}
+
+	for instance in instances:
+		for key in instance.values.keys():
+			if instance.values[key] in values[instance.Classification][key].keys():
+				values[instance.Classification][key][instance.values[key]] += 1
+			else:
+				values[instance.Classification][key][instance.values[key]] = 1
+
+	# for instance in instances:
+	# 	for key in instance.values.keys():
+	# 		if values[instance.Classification][key][instance.values[key]] in values[instance.Classification][key].keys():
+	# 			values[instance.Classification][key][instance.values[key]] += 1
+	# 		else:
+	# 			values[instance.Classification][key][instance.values[key]] = 1
+
+	numberOfClass = {}
+
+	for instance in instances:
+		if instance.Classification in numberOfClass.keys():
+			numberOfClass[instance.Classification] += 1
+		else:
+			numberOfClass[instance.Classification] = 1
+
+	valueContainer = valueTracker(values, len(instances), numberOfClass)
+
+
+	
+
+	return valueContainer
+
+
+
+
+
+
+
+
+
+
+
+
+
+def Test(file, valueContainer):
 	#parse Instances into list
 	instances = parseDataFile(file)
 	totalNumInstances = 0
 	for i in instances:
 		totalNumInstances += 1
 	
-	print grade(instances, totalNumInstances)
+	print grade(instances, totalNumInstances, valueContainer)
 
-def sort(instance, tNI): #method for sorting instances based on probability, takes an instance
+def sort(instance, tNI, valueContainer): #method for sorting instances based on probability, takes an instance
 							#and the total number of all instances
 	
-	#placeholder for totalCounts
-	totalCounts = {}
-	totalCounts["geek"] = 70
-	totalCounts["nongeek"] = 146
+	# #placeholder for totalCounts
+	# totalCounts = {}
+	# totalCounts["geek"] = 70
+	# totalCounts["non-geek"] = 146
+	totalCounts = valueContainer.totalCounts
 	
 	classesProb =  totalCounts
 	
@@ -80,22 +160,34 @@ def sort(instance, tNI): #method for sorting instances based on probability, tak
 	probSum = 0
 	for c in classesProb:
 		for a in instance.values: #summing the probability of each attribute
-			probSum = probSum + log(getValueCount(a, i.values[a], c))
+			probSum = probSum + math.log(valueContainer.getValueCount(a, instance.values[a], c))
 		classesProb[c] = classesProb[c] + probSum #The probability for the instance to be classified as c is recorded
 	return max(classesProb.iteritems(), key = operator.itemgetter(1))[0] #return class with highest value in probability sum
 		#Resources: http://docs.python.org/2/library/functions.html#max, 
 			#http://docs.python.org/2/library/operator.html, 
 			#http://stackoverflow.com/questions/16569502/get-the-key-correspond-to-maxvalue-in-python-dict?lq=1
 	
-def grade(instanceList, totalNumInstances):
+def grade(instanceList, totalNumInstances, valueContainer):
 	correctSum = 0	#accuracy of the classification
 	for i in instanceList:
 		#print sort(i, totalNumInstances) + " " + i.values["Classification"] + '\n'
-		if(i.values["Classification"] == sort(i, totalNumInstances)): #if 'actual' class matches the naive bayes classifier
+		if(i.Classification == sort(i, totalNumInstances, valueContainer)): #if 'actual' class matches the naive bayes classifier
 			correctSum = correctSum + 1			#increment correctSum to reflect it
 
 	return (float(correctSum) / totalNumInstances) # after iterating through all instances, return the accuracy rating
 	
+
+
+
+
+
+
+
+
+
 if __name__ == '__main__':
-	filePath = "/Users/camille.miles/Documents/code/geek.csv"
-	Test(filePath)
+	filePath = "/home/hack/Programming/Rbes/wrongData.txt"
+	valueContainer = train(filePath)
+	filePath = "/home/hack/Programming/Rbes/data.txt"
+	Test(filePath, valueContainer)
+	 
